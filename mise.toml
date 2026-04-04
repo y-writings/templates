@@ -1,0 +1,5 @@
+[settings]
+experimental = true
+
+[hooks]
+enter = "if [ -f lefthook.yml ]; then lefthook install; fi"
