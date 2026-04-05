@@ -1,0 +1,13 @@
+[settings]
+experimental = true
+
+[hooks]
+enter = "if [ -f lefthook.yaml ]; then lefthook install; fi"
+
+[tasks.pin]
+description = "Scan all repository files with betterleaks"
+run = ["pinact run --check --fix", "dockerfile-pin run --write"]
+
+[tasks.scan]
+description = "Scan all repository files with betterleaks"
+run = ["betterleaks dir --no-banner --redact=20 ."]
