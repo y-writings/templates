@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: Trust checked out workspace for git scans
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        run: git config --global --add safe.directory "*"
 
       - name: Run betterleaks
         run: betterleaks git --no-banner --verbose .
