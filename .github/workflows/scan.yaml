@@ -17,6 +17,4 @@ jobs:
           fetch-depth: 0
 
       - name: Run betterleaks
-        run: |
-          git config --global --add safe.directory "*"
-          betterleaks git --no-banner --verbose .
+        run: betterleaks dir --no-banner --verbose .
