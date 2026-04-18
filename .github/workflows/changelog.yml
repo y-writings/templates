@@ -20,11 +20,13 @@ concurrency:
 
 jobs:
   update-changelog:
-    name: Generate and commit CHANGELOG.md
+    name: Generate and propose CHANGELOG.md updates
     runs-on: ubuntu-latest
     permissions:
-      # Required because this workflow commits the generated CHANGELOG.md.
+      # Required to update the generated changelog branch.
       contents: write
+      # Required to create or update the changelog pull request.
+      pull-requests: write
     env:
       # git-cliff writes directly to the tracked changelog file.
       OUTPUT: CHANGELOG.md
@@ -45,21 +47,43 @@ jobs:
           args: --verbose
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure git author
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Commit updated changelog
+      - name: Validate automation token configuration
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_PLEASE_APP_ID: ${{ vars.RELEASE_PLEASE_APP_ID }}
+          RELEASE_PLEASE_APP_PRIVATE_KEY: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
         run: |
-          git add CHANGELOG.md
-
-          if git diff --cached --quiet; then
-            echo "No changelog changes to commit"
-            exit 0
+          if [ -z "${RELEASE_PLEASE_APP_ID}" ]; then
+            echo "RELEASE_PLEASE_APP_ID is required to create changelog PRs with a GitHub App token."
+            exit 1
           fi
 
-          git commit -m "docs: update changelog"
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:${GITHUB_REF_NAME}
+          if [ -z "${RELEASE_PLEASE_APP_PRIVATE_KEY}" ]; then
+            echo "RELEASE_PLEASE_APP_PRIVATE_KEY is required to create changelog PRs with a GitHub App token."
+            exit 1
+          fi
+
+      - name: Mint GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ vars.RELEASE_PLEASE_APP_ID }}
+          owner: ${{ github.repository_owner }}
+          private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
+
+      - name: Create or update changelog pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          add-paths: |
+            CHANGELOG.md
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          branch: automation/update-changelog
+          base: main
+          commit-message: "docs(changelog): update changelog"
+          delete-branch: true
+          title: "docs(changelog): update changelog"
+          body: |
+            ## Summary
+            - regenerate `CHANGELOG.md` from the latest `main` branch history
+            - keep changelog updates on a dedicated automation branch instead of pushing directly to `main`
