@@ -1,0 +1,65 @@
+name: changelog
+
+on:
+  # Refresh the tracked changelog after changes land on the default branch.
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - CHANGELOG.md
+  # Allow maintainers to regenerate the changelog on demand.
+  workflow_dispatch:
+
+# Default to no permissions and grant write only where the job needs it.
+permissions: {}
+
+concurrency:
+  # Prevent overlapping changelog rewrites on the same branch.
+  group: changelog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-changelog:
+    name: Generate and commit CHANGELOG.md
+    runs-on: ubuntu-latest
+    permissions:
+      # Required because this workflow commits the generated CHANGELOG.md.
+      contents: write
+    env:
+      # git-cliff writes directly to the tracked changelog file.
+      OUTPUT: CHANGELOG.md
+      GITHUB_REPO: ${{ github.repository }}
+    steps:
+      - name: Check out repository with full history
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # git-cliff needs the full history to calculate the changelog correctly.
+          fetch-depth: 0
+
+      - name: Generate CHANGELOG.md from git history
+        id: git-cliff
+        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        with:
+          # Use the checked-in git-cliff configuration for repository history.
+          config: cliff.toml
+          args: --verbose
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git author
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Commit updated changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git add CHANGELOG.md
+
+          if git diff --cached --quiet; then
+            echo "No changelog changes to commit"
+            exit 0
+          fi
+
+          git commit -m "docs: update changelog"
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:${GITHUB_REF_NAME}
