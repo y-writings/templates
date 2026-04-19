@@ -7,11 +7,11 @@ repo = "templates"
 header = """
 # Changelog
 
-All notable changes to this project are documented in this file.
+All notable weekly snapshots of this project are documented in this file.
 """
 body = """
 {% if version %}
-## {{ version | trim_start_matches(pat="v") }} - {{ timestamp | date(format="%Y-%m-%d") }}
+## {{ version }}
 {% else %}
 ## Unreleased
 {% endif %}
@@ -33,7 +33,7 @@ footer = """
 conventional_commits = true
 filter_unconventional = true
 split_commits = false
-tag_pattern = "v[0-9].*"
+tag_pattern = "v[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}"
 sort_commits = "oldest"
 
 commit_parsers = [
