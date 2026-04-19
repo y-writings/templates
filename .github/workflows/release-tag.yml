@@ -1,123 +1,67 @@
 name: release-tag
 
 on:
-  pull_request_target:
-    types:
-      - closed
+  push:
+    branches:
+      - main
+    paths:
+      - CHANGELOG.md
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-tag-${{ github.event.pull_request.number }}
+  group: release-tag-main
   cancel-in-progress: false
 
 jobs:
   create-release-tag:
     name: Create release tag after changelog merge
     if: >-
-      ${{ github.event.pull_request.merged &&
-      github.event.pull_request.base.ref == 'main' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'automation/update-changelog' &&
-      github.event.pull_request.title == 'docs(changelog): update changelog' }}
+      ${{ github.actor == 'github-actions[bot]' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository with full history and tags
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Derive date-based release tag from merge commit
+      - name: Derive release tag from merge commit
         id: release-tag
         env:
-          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-        run: |
-          if [ -z "${MERGE_COMMIT_SHA}" ]; then
-            echo "GitHub did not provide a merge commit SHA for the merged pull request."
-            exit 1
-          fi
+          MERGE_COMMIT_SHA: ${{ github.sha }}
+        run: bash scripts/derive-release-tag.sh "${MERGE_COMMIT_SHA}"
 
-          release_date="$(git show -s --format=%cd --date=format:'%Y.%m.%d' "${MERGE_COMMIT_SHA}")"
-
-          if [ -z "${release_date}" ]; then
-            echo "Could not derive a release date from the merge commit."
-            exit 1
-          fi
-
-          if ! printf '%s\n' "${MERGE_COMMIT_SHA}" | grep -Eq '^[0-9a-f]{40}$'; then
-            echo "Could not derive a lowercase commit SHA from the merged pull request."
-            exit 1
-          fi
-
-          prefix_length=3
-          while [ "${prefix_length}" -le 40 ]; do
-            short_sha="$(printf '%s' "${MERGE_COMMIT_SHA}" | cut -c1-"${prefix_length}")"
-            candidate_tag="v${release_date}-${short_sha}"
-
-            if git rev-parse --verify --quiet "refs/tags/${candidate_tag}^{commit}" > /dev/null; then
-              existing_commit="$(git rev-parse "refs/tags/${candidate_tag}^{commit}")"
-
-              if [ "${existing_commit}" = "${MERGE_COMMIT_SHA}" ]; then
-                echo "tag=${candidate_tag}" >> "${GITHUB_OUTPUT}"
-                echo "exists=true" >> "${GITHUB_OUTPUT}"
-                exit 0
-              fi
-
-              prefix_length=$((prefix_length + 1))
-              continue
-            fi
-
-            echo "tag=${candidate_tag}" >> "${GITHUB_OUTPUT}"
-            echo "exists=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          done
-
-          echo "Could not derive a unique tag name from the merge commit SHA."
-          exit 1
-
-      - name: Check whether the release tag already exists
-        id: tag-status
+      - name: Check whether the GitHub release already exists
+        id: release-status
         env:
-          EXISTS: ${{ steps.release-tag.outputs.exists }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.release-tag.outputs.tag }}
         run: |
-          if [ "${EXISTS}" = 'true' ]; then
-            echo "exists=true" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
-
-          if git rev-parse --verify --quiet "refs/tags/${TAG}" > /dev/null; then
+          if gh release view "${TAG}" > /dev/null 2>&1; then
             echo "exists=true" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
 
           echo "exists=false" >> "${GITHUB_OUTPUT}"
 
-      - name: Create annotated tag on the merge commit
-        if: steps.tag-status.outputs.exists == 'false'
+      - name: Create GitHub release for the merge commit
+        if: steps.release-status.outputs.exists == 'false'
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.release-tag.outputs.tag }}
-          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          MERGE_COMMIT_SHA: ${{ github.sha }}
         run: |
           if [ -z "${MERGE_COMMIT_SHA}" ]; then
-            echo "GitHub did not provide a merge commit SHA for the merged pull request."
+            echo "GitHub did not provide the push commit SHA."
             exit 1
           fi
 
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          gh release create "${TAG}" --target "${MERGE_COMMIT_SHA}" --title "Release ${TAG}" --notes "Release ${TAG}"
 
-          git tag --annotate --message "Release ${TAG}" "${TAG}" "${MERGE_COMMIT_SHA}"
-
-      - name: Push annotated tag to origin
-        if: steps.tag-status.outputs.exists == 'false'
+      - name: Report existing release
+        if: steps.release-status.outputs.exists == 'true'
         env:
           TAG: ${{ steps.release-tag.outputs.tag }}
-        run: git push origin "refs/tags/${TAG}"
-
-      - name: Report existing tag
-        if: steps.tag-status.outputs.exists == 'true'
-        env:
-          TAG: ${{ steps.release-tag.outputs.tag }}
-        run: echo "Tag ${TAG} already exists. Skipping tag creation."
+        run: echo "Release ${TAG} already exists. Skipping release creation."
