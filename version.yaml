@@ -1,0 +1,5 @@
+cadence: weekly
+timezone: UTC
+snapshot_day: monday
+snapshot_time: "00:00"
+tag_format: vYYYY.MM.DD
