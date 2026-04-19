@@ -16,22 +16,11 @@ assert_equals() {
   fi
 }
 
-create_commit() {
-  message="$1"
-  content="$2"
-  commit_date="$3"
-
-  printf '%s\n' "$content" > tracked.txt
-  git add tracked.txt
-  GIT_AUTHOR_DATE="$commit_date" GIT_COMMITTER_DATE="$commit_date" git commit -m "$message" > /dev/null
-  git rev-parse HEAD
-}
-
 run_helper() {
-  commit_sha="$1"
+  snapshot_date="$1"
   output_file="$2"
 
-  GITHUB_OUTPUT="$output_file" bash "$helper_script" "$commit_sha"
+  SNAPSHOT_DATE="$snapshot_date" GITHUB_OUTPUT="$output_file" bash "$helper_script"
 }
 
 tmp_dir="$(mktemp -d)"
@@ -42,40 +31,31 @@ git init > /dev/null
 git config user.name 'Test User'
 git config user.email 'test@example.com'
 
-base_commit="$(create_commit 'base commit' 'base' '2026-04-19T09:00:00+09:00')"
-target_commit="$(create_commit 'target commit' 'target' '2026-04-19T10:00:00+09:00')"
-release_date='2026.04.19'
-prefix3="$(printf '%s' "$target_commit" | cut -c1-3)"
-prefix4="$(printf '%s' "$target_commit" | cut -c1-4)"
+printf 'base\n' > tracked.txt
+git add tracked.txt
+git commit -m 'chore: create test fixture' > /dev/null
+
+snapshot_date='2026.04.19'
 
 output_file="$(mktemp)"
-run_helper "$target_commit" "$output_file"
+run_helper "$snapshot_date" "$output_file"
 
 tag="$(grep '^tag=' "$output_file" | cut -d= -f2-)"
 tag_exists="$(grep '^tag_exists=' "$output_file" | cut -d= -f2-)"
-assert_equals "v${release_date}-${prefix3}" "$tag" 'uses sha3 when no collision exists'
+assert_equals "v${snapshot_date}" "$tag" 'uses the snapshot date as the complete tag name'
 assert_equals 'false' "$tag_exists" 'reports missing tag for a new candidate'
 
-git tag "v${release_date}-${prefix3}" "$base_commit"
+git tag "v${snapshot_date}" HEAD
 output_file="$(mktemp)"
-run_helper "$target_commit" "$output_file"
+run_helper "$snapshot_date" "$output_file"
 
 tag="$(grep '^tag=' "$output_file" | cut -d= -f2-)"
 tag_exists="$(grep '^tag_exists=' "$output_file" | cut -d= -f2-)"
-assert_equals "v${release_date}-${prefix4}" "$tag" 'extends prefix when a different commit already owns sha3 tag'
-assert_equals 'false' "$tag_exists" 'reports false after choosing a longer unused tag'
+assert_equals "v${snapshot_date}" "$tag" 'reuses the same date tag when it already exists'
+assert_equals 'true' "$tag_exists" 'reports true when the date tag already exists'
 
-git tag "v${release_date}-${prefix4}" "$target_commit"
-output_file="$(mktemp)"
-run_helper "$target_commit" "$output_file"
-
-tag="$(grep '^tag=' "$output_file" | cut -d= -f2-)"
-tag_exists="$(grep '^tag_exists=' "$output_file" | cut -d= -f2-)"
-assert_equals "v${release_date}-${prefix4}" "$tag" 'reuses the existing matching tag for the same commit'
-assert_equals 'true' "$tag_exists" 'reports true when the chosen tag already points at the same commit'
-
-if bash "$helper_script" not-a-sha > /dev/null 2>&1; then
-  printf 'expected invalid SHA invocation to fail\n' >&2
+if SNAPSHOT_DATE='2026-04-19' bash "$helper_script" > /dev/null 2>&1; then
+  printf 'expected invalid snapshot date invocation to fail\n' >&2
   exit 1
 fi
 
