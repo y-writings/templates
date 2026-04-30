@@ -5,7 +5,7 @@ experimental = true
 enter = "if [ -f lefthook.yaml ]; then lefthook install; fi"
 
 [tasks.pin]
-description = "Scan all repository files with betterleaks"
+description = "Pin repository references with pinact and dockerfile-pin"
 run = ["pinact run --check --fix", "dockerfile-pin run --write"]
 
 [tasks.scan]
