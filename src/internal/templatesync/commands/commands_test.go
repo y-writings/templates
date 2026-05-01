@@ -1,7 +1,9 @@
-package templatesync
+package commands
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,6 +23,17 @@ func TestCheckDetectsMissingTarget(t *testing.T) {
 	}
 	if !strings.Contains(stdout.String(), "add sample") {
 		t.Fatalf("expected add status, got %q", stdout.String())
+	}
+}
+
+func TestRunAcceptsLeadingArgumentSeparator(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{"--", "help"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("help with argument separator failed: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "usage: template-sync") {
+		t.Fatalf("expected usage output, got %q", stdout.String())
 	}
 }
 
@@ -112,14 +125,11 @@ func TestPruneRemovesOnlyUnchangedStaleFiles(t *testing.T) {
 	targetDir := t.TempDir()
 	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates: []\n")
 	writeFile(t, targetDir, "old.txt", "old\n")
-	hash, exists, err := fileHash(filepath.Join(targetDir, "old.txt"))
-	if err != nil || !exists {
-		t.Fatalf("hash old file: %v exists=%v", err, exists)
-	}
+	hash := hashFile(t, filepath.Join(targetDir, "old.txt"))
 	writeFile(t, targetDir, ".template-sync.lock", "files:\n  old:\n    target: old.txt\n    source_sha256: "+hash+"\n")
 
 	var stdout, stderr bytes.Buffer
-	err = Run([]string{"prune", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	err := Run([]string{"prune", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
 	if err != nil {
 		t.Fatalf("prune failed: %v\nstderr: %s", err, stderr.String())
 	}
@@ -166,4 +176,14 @@ func readFile(t *testing.T, root, path string) string {
 		t.Fatal(err)
 	}
 	return string(data)
+}
+
+func hashFile(t *testing.T, path string) string {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])
 }

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/y-writings/templates/src/internal/templatesync"
+	"github.com/y-writings/templates/src/internal/templatesync/commands"
 )
 
 func main() {
-	if err := templatesync.Run(os.Args[1:], os.Stdout, os.Stderr); err != nil {
+	if err := commands.Run(os.Args[1:], os.Stdout, os.Stderr); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
