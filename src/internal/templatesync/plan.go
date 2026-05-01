@@ -13,7 +13,7 @@ type Options struct {
 	Ref          string
 }
 
-func defaultOptions() Options {
+func DefaultOptions() Options {
 	return Options{
 		ManifestPath: "templates.yaml",
 		LockPath:     ".template-sync.lock",
@@ -22,7 +22,7 @@ func defaultOptions() Options {
 	}
 }
 
-func buildPlan(opts Options) (Manifest, LockFile, []Change, error) {
+func BuildPlan(opts Options) (Manifest, LockFile, []Change, error) {
 	manifestPath, err := pathWithin(opts.TemplateDir, opts.ManifestPath, "manifest")
 	if err != nil {
 		return Manifest{}, LockFile{}, nil, err
@@ -116,7 +116,7 @@ func buildPlan(opts Options) (Manifest, LockFile, []Change, error) {
 	return manifest, lock, changes, nil
 }
 
-func hasDrift(changes []Change) bool {
+func HasDrift(changes []Change) bool {
 	for _, change := range changes {
 		if change.Status != StatusSynced {
 			return true

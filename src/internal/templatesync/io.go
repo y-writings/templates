@@ -58,7 +58,7 @@ func loadLock(path string) (LockFile, error) {
 	return lock, nil
 }
 
-func writeLock(path string, lock LockFile) error {
+func WriteLock(path string, lock LockFile) error {
 	data, err := yaml.Marshal(lock)
 	if err != nil {
 		return fmt.Errorf("encode lock file: %w", err)
@@ -84,7 +84,7 @@ func fileHash(path string) (string, bool, error) {
 	return hex.EncodeToString(sum[:]), true, nil
 }
 
-func copyFile(source, target string) error {
+func CopyFile(source, target string) error {
 	data, err := os.ReadFile(source)
 	if err != nil {
 		return err
