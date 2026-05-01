@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/y-writings/templates/internal/templatesync"
+	"github.com/y-writings/templates/src/internal/templatesync"
 )
 
 func main() {
