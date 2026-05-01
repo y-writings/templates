@@ -2,7 +2,6 @@ package templatesync
 
 import (
 	"fmt"
-	"path/filepath"
 )
 
 type Options struct {
@@ -24,11 +23,19 @@ func defaultOptions() Options {
 }
 
 func buildPlan(opts Options) (Manifest, LockFile, []Change, error) {
-	manifest, err := loadManifest(filepath.Join(opts.TemplateDir, opts.ManifestPath))
+	manifestPath, err := pathWithin(opts.TemplateDir, opts.ManifestPath, "manifest")
+	if err != nil {
+		return Manifest{}, LockFile{}, nil, err
+	}
+	lockPath, err := pathWithin(opts.TargetDir, opts.LockPath, "lock")
+	if err != nil {
+		return Manifest{}, LockFile{}, nil, err
+	}
+	manifest, err := loadManifest(manifestPath)
 	if err != nil {
 		return manifest, LockFile{}, nil, err
 	}
-	lock, err := loadLock(filepath.Join(opts.TargetDir, opts.LockPath))
+	lock, err := loadLock(lockPath)
 	if err != nil {
 		return manifest, lock, nil, err
 	}
@@ -37,8 +44,14 @@ func buildPlan(opts Options) (Manifest, LockFile, []Change, error) {
 	var changes []Change
 	for _, item := range manifest.Template {
 		manifestIDs[item.ID] = item
-		sourcePath := filepath.Join(opts.TemplateDir, item.Source)
-		targetPath := filepath.Join(opts.TargetDir, item.Target)
+		sourcePath, err := pathWithin(opts.TemplateDir, item.Source, fmt.Sprintf("source %q", item.ID))
+		if err != nil {
+			return manifest, lock, nil, err
+		}
+		targetPath, err := pathWithin(opts.TargetDir, item.Target, fmt.Sprintf("target %q", item.ID))
+		if err != nil {
+			return manifest, lock, nil, err
+		}
 		sourceHash, sourceExists, err := fileHash(sourcePath)
 		if err != nil {
 			return manifest, lock, nil, fmt.Errorf("hash source %s: %w", item.Source, err)
@@ -77,7 +90,10 @@ func buildPlan(opts Options) (Manifest, LockFile, []Change, error) {
 		if _, ok := manifestIDs[id]; ok {
 			continue
 		}
-		targetPath := filepath.Join(opts.TargetDir, item.Target)
+		targetPath, err := pathWithin(opts.TargetDir, item.Target, fmt.Sprintf("locked target %q", id))
+		if err != nil {
+			return manifest, lock, nil, err
+		}
 		currentHash, targetExists, err := fileHash(targetPath)
 		if err != nil {
 			return manifest, lock, nil, fmt.Errorf("hash stale target %s: %w", item.Target, err)

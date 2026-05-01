@@ -54,6 +54,59 @@ func TestUpdateCopiesFilesAndWritesLock(t *testing.T) {
 	}
 }
 
+func TestUpdateCreatesNestedLockParents(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: sample.txt\n")
+	writeFile(t, templateDir, "sample.txt", "hello\n")
+
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{
+		"update",
+		"--template-dir", templateDir,
+		"--target-dir", targetDir,
+		"--lock", ".config/template-sync.lock",
+	}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("update failed: %v\nstderr: %s", err, stderr.String())
+	}
+	if lock := readFile(t, targetDir, ".config/template-sync.lock"); !strings.Contains(lock, "sample:") {
+		t.Fatalf("nested lock was not written correctly:\n%s", lock)
+	}
+}
+
+func TestRejectsManifestPathsThatEscapeRoots(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: ../outside.txt\n")
+	writeFile(t, templateDir, "sample.txt", "hello\n")
+
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected escaping target path to fail")
+	}
+	if !strings.Contains(err.Error(), "escapes root") {
+		t.Fatalf("expected containment error, got %v", err)
+	}
+}
+
+func TestRejectsLockTargetsThatEscapeRoots(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates: []\n")
+	writeFile(t, targetDir, ".template-sync.lock", "files:\n  old:\n    target: ../outside.txt\n    source_sha256: 0000\n")
+
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{"prune", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected escaping lock target path to fail")
+	}
+	if !strings.Contains(err.Error(), "escapes root") {
+		t.Fatalf("expected containment error, got %v", err)
+	}
+}
+
 func TestPruneRemovesOnlyUnchangedStaleFiles(t *testing.T) {
 	templateDir := t.TempDir()
 	targetDir := t.TempDir()
