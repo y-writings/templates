@@ -1,0 +1,17 @@
+version: 1
+templates:
+  - id: github-workflow-scan
+    source: .github/workflows/scan.yaml
+    target: .github/workflows/scan.yaml
+  - id: github-workflow-semantic-pr
+    source: .github/workflows/semantic-pr.yaml
+    target: .github/workflows/semantic-pr.yaml
+  - id: commitlint
+    source: .commitlintrc.yaml
+    target: .commitlintrc.yaml
+  - id: lefthook
+    source: lefthook.yaml
+    target: lefthook.yaml
+  - id: pinact
+    source: .pinact.yaml
+    target: .pinact.yaml
