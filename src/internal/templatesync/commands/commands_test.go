@@ -26,6 +26,17 @@ func TestCheckDetectsMissingTarget(t *testing.T) {
 	}
 }
 
+func TestRunAcceptsLeadingArgumentSeparator(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{"--", "help"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("help with argument separator failed: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "usage: template-sync") {
+		t.Fatalf("expected usage output, got %q", stdout.String())
+	}
+}
+
 func TestUpdateCopiesFilesAndWritesLock(t *testing.T) {
 	templateDir := t.TempDir()
 	targetDir := t.TempDir()
