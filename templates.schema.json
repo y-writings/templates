@@ -20,6 +20,14 @@
       "items": {
         "$ref": "#/$defs/template"
       }
+    },
+    "gitignore": {
+      "type": "array",
+      "description": "Patterns that should be added to the target repository .gitignore.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     }
   },
   "$defs": {
@@ -46,6 +54,10 @@
           "type": "string",
           "minLength": 1,
           "description": "Path to destination file in target repository."
+        },
+        "if_not_exists": {
+          "type": "boolean",
+          "description": "Skip writing the template when target already exists."
         }
       }
     }
