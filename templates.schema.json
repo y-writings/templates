@@ -9,6 +9,11 @@
     "templates"
   ],
   "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional schema marker for YAML tooling."
+    },
     "version": {
       "type": "integer",
       "const": 1,
