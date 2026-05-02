@@ -37,10 +37,17 @@ func runUpdate(opts templatesync.Options, stdout io.Writer) error {
 			fmt.Fprintf(stdout, "%s %s -> %s\n", change.Status, item.Source, item.Target)
 		case templatesync.StatusSynced:
 			item := sourceByID[change.ID]
-			lock.Files[change.ID] = templatesync.LockItem{Target: item.Target, SourceSHA256: change.SourceHash}
+			lockHash := change.SourceHash
+			if item.IfNotExists && change.CurrentHash != "" {
+				lockHash = change.CurrentHash
+			}
+			lock.Files[change.ID] = templatesync.LockItem{Target: item.Target, SourceSHA256: lockHash}
 		case templatesync.StatusPrune, templatesync.StatusConflict:
 			fmt.Fprintf(stdout, "skip %s %s: %s\n", change.Status, change.ID, change.Reason)
 		}
+	}
+	if err := templatesync.EnsureGitIgnore(filepath.Join(opts.TargetDir, ".gitignore"), manifest.GitIgnore); err != nil {
+		return fmt.Errorf("update .gitignore: %w", err)
 	}
 	if err := templatesync.WriteLock(filepath.Join(opts.TargetDir, opts.LockPath), lock); err != nil {
 		return err

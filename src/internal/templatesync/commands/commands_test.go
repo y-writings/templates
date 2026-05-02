@@ -187,3 +187,48 @@ func hashFile(t *testing.T, path string) string {
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:])
 }
+
+func TestUpdateAddsConfiguredGitIgnoreEntries(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ngitignore:\n  - .gh\n  - .cache/tool\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: sample.txt\n")
+	writeFile(t, templateDir, "sample.txt", "hello\n")
+	writeFile(t, targetDir, ".gitignore", "node_modules\n")
+
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("update failed: %v", err)
+	}
+	got := readFile(t, targetDir, ".gitignore")
+	for _, want := range []string{"node_modules", ".gh", ".cache/tool"} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("expected .gitignore to contain %q, got %q", want, got)
+		}
+	}
+}
+
+func TestIfNotExistsSkipsUpdateAndPrunesWhenUnchanged(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: sample.txt\n    if_not_exists: true\n")
+	writeFile(t, templateDir, "sample.txt", "from-template\n")
+	writeFile(t, targetDir, "sample.txt", "local\n")
+
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("update failed: %v", err)
+	}
+	if got := readFile(t, targetDir, "sample.txt"); got != "local\n" {
+		t.Fatalf("expected existing file to remain unchanged, got %q", got)
+	}
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates: []\n")
+	err = Run([]string{"prune", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("prune failed: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(targetDir, "sample.txt")); !os.IsNotExist(err) {
+		t.Fatalf("expected sample.txt to be pruned, stat err=%v", err)
+	}
+}

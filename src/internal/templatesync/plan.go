@@ -79,6 +79,8 @@ func BuildPlan(opts Options) (Manifest, LockFile, []Change, error) {
 		case !targetExists:
 			change.Status = StatusAdd
 			change.Reason = "target file is missing"
+		case item.IfNotExists:
+			change.Reason = "if_not_exists is enabled and target exists"
 		case currentHash != sourceHash:
 			change.Status = StatusUpdate
 			change.Reason = "target differs from template"
