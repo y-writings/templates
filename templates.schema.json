@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./templates.schema.json",
+  "title": "Template sync configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "templates"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Configuration schema version."
+    },
+    "templates": {
+      "type": "array",
+      "description": "Templates to synchronize from source into target repositories.",
+      "items": {
+        "$ref": "#/$defs/template"
+      }
+    }
+  },
+  "$defs": {
+    "template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source",
+        "target"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Logical template identifier."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to source file in this repository."
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path to destination file in target repository."
+        }
+      }
+    }
+  }
+}
