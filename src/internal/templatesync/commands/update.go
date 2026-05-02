@@ -39,7 +39,7 @@ func runUpdate(opts templatesync.Options, stdout io.Writer) error {
 			item := sourceByID[change.ID]
 			lockHash := change.SourceHash
 			if item.IfNotExists && change.CurrentHash != "" {
-				if locked, ok := lock.Files[change.ID]; ok && locked.SourceSHA256 != "" {
+				if locked, ok := lock.Files[change.ID]; ok && locked.SourceSHA256 != "" && locked.Target == item.Target {
 					lockHash = locked.SourceSHA256
 				} else {
 					lockHash = change.CurrentHash

@@ -261,3 +261,30 @@ func TestIfNotExistsKeepsInitialLockHashAcrossUpdates(t *testing.T) {
 		t.Fatalf("expected conflict output, got %q", stdout.String())
 	}
 }
+
+func TestIfNotExistsResetsLockHashWhenTargetPathChanges(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: old.txt\n    if_not_exists: true\n")
+	writeFile(t, templateDir, "sample.txt", "from-template\n")
+	writeFile(t, targetDir, "old.txt", "old-local\n")
+
+	var stdout, stderr bytes.Buffer
+	if err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("first update failed: %v", err)
+	}
+
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: new.txt\n    if_not_exists: true\n")
+	writeFile(t, targetDir, "new.txt", "new-local\n")
+	if err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("second update failed: %v", err)
+	}
+
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates: []\n")
+	if err := Run([]string{"prune", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("prune failed: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(targetDir, "new.txt")); !os.IsNotExist(err) {
+		t.Fatalf("expected new.txt to be pruned, stat err=%v", err)
+	}
+}
