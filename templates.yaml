@@ -18,3 +18,18 @@ templates:
   - id: pinact
     source: .pinact.yaml
     target: .pinact.yaml
+  - id: mise-baseline
+    source: .mise/config.baseline.toml
+    target: .mise/config.baseline.toml
+  - id: mise-project
+    source: .mise/config.toml
+    target: .mise/config.toml
+    if_not_exists: true
+  - id: mise-rc
+    source: .miserc.toml
+    target: .miserc.toml
+  - id: LICENSE
+    source: LICENSE
+    target: LICENSE
+gitignore:
+  - .gh
