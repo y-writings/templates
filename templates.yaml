@@ -1,5 +1,7 @@
-$schema: ./templates.schema.json
+# yaml-language-server: $schema=./templates.schema.json
 version: 1
+$schema: ./templates.schema.json
+
 templates:
   - id: github-workflow-scan
     source: .github/workflows/scan.yaml
