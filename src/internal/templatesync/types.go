@@ -1,14 +1,16 @@
 package templatesync
 
 type Manifest struct {
-	Version  int                `yaml:"version"`
-	Template []ManifestTemplate `yaml:"templates"`
+	Version   int                `yaml:"version"`
+	GitIgnore []string           `yaml:"gitignore,omitempty"`
+	Template  []ManifestTemplate `yaml:"templates"`
 }
 
 type ManifestTemplate struct {
-	ID     string `yaml:"id"`
-	Source string `yaml:"source"`
-	Target string `yaml:"target"`
+	ID          string `yaml:"id"`
+	Source      string `yaml:"source"`
+	Target      string `yaml:"target"`
+	IfNotExists bool   `yaml:"if_not_exists,omitempty"`
 }
 
 type LockFile struct {

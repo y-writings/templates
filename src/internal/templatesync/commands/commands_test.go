@@ -187,3 +187,104 @@ func hashFile(t *testing.T, path string) string {
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:])
 }
+
+func TestUpdateAddsConfiguredGitIgnoreEntries(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ngitignore:\n  - .gh\n  - .cache/tool\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: sample.txt\n")
+	writeFile(t, templateDir, "sample.txt", "hello\n")
+	writeFile(t, targetDir, ".gitignore", "node_modules\n")
+
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("update failed: %v", err)
+	}
+	got := readFile(t, targetDir, ".gitignore")
+	for _, want := range []string{"node_modules", ".gh", ".cache/tool"} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("expected .gitignore to contain %q, got %q", want, got)
+		}
+	}
+}
+
+func TestIfNotExistsSkipsUpdateAndPrunesWhenUnchanged(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: sample.txt\n    if_not_exists: true\n")
+	writeFile(t, templateDir, "sample.txt", "from-template\n")
+	writeFile(t, targetDir, "sample.txt", "local\n")
+
+	var stdout, stderr bytes.Buffer
+	err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("update failed: %v", err)
+	}
+	if got := readFile(t, targetDir, "sample.txt"); got != "local\n" {
+		t.Fatalf("expected existing file to remain unchanged, got %q", got)
+	}
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates: []\n")
+	err = Run([]string{"prune", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("prune failed: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(targetDir, "sample.txt")); !os.IsNotExist(err) {
+		t.Fatalf("expected sample.txt to be pruned, stat err=%v", err)
+	}
+}
+
+func TestIfNotExistsKeepsInitialLockHashAcrossUpdates(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: sample.txt\n    if_not_exists: true\n")
+	writeFile(t, templateDir, "sample.txt", "from-template\n")
+	writeFile(t, targetDir, "sample.txt", "initial-local\n")
+
+	var stdout, stderr bytes.Buffer
+	if err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("first update failed: %v", err)
+	}
+
+	writeFile(t, targetDir, "sample.txt", "edited-local\n")
+	if err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("second update failed: %v", err)
+	}
+
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates: []\n")
+	if err := Run([]string{"prune", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("prune failed: %v", err)
+	}
+	if got := readFile(t, targetDir, "sample.txt"); got != "edited-local\n" {
+		t.Fatalf("expected edited file to remain, got %q", got)
+	}
+	if !strings.Contains(stdout.String(), "conflict sample") {
+		t.Fatalf("expected conflict output, got %q", stdout.String())
+	}
+}
+
+func TestIfNotExistsResetsLockHashWhenTargetPathChanges(t *testing.T) {
+	templateDir := t.TempDir()
+	targetDir := t.TempDir()
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: old.txt\n    if_not_exists: true\n")
+	writeFile(t, templateDir, "sample.txt", "from-template\n")
+	writeFile(t, targetDir, "old.txt", "old-local\n")
+
+	var stdout, stderr bytes.Buffer
+	if err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("first update failed: %v", err)
+	}
+
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates:\n  - id: sample\n    source: sample.txt\n    target: new.txt\n    if_not_exists: true\n")
+	writeFile(t, targetDir, "new.txt", "new-local\n")
+	if err := Run([]string{"update", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("second update failed: %v", err)
+	}
+
+	writeFile(t, templateDir, "templates.yaml", "version: 1\ntemplates: []\n")
+	if err := Run([]string{"prune", "--template-dir", templateDir, "--target-dir", targetDir}, &stdout, &stderr); err != nil {
+		t.Fatalf("prune failed: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(targetDir, "new.txt")); !os.IsNotExist(err) {
+		t.Fatalf("expected new.txt to be pruned, stat err=%v", err)
+	}
+}
