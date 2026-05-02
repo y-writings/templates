@@ -1,3 +1,4 @@
+$schema: ./templates.schema.json
 version: 1
 templates:
   - id: github-workflow-scan
