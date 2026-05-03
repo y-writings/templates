@@ -94,3 +94,25 @@ Expected behavior:
 2. If the workflow fails because the action is blocked, reopen `Settings > Actions > General` and update the allowlist policy.
 3. If the snapshot workflow cannot push tags, review repository rules around tag creation and verify that `contents: write` is available to `GITHUB_TOKEN`.
 4. If the changelog is incomplete, confirm the workflows still check out the repository with `fetch-depth: 0` and that tags are available in the repository history.
+
+## 9. Include Entire checkpoint IDs in squash commit messages
+
+This repository can keep `Entire-Checkpoint` IDs in squash commit messages by updating the PR body automatically.
+
+1. Open `Settings > General > Pull Requests`.
+2. In **Allow squash merging**, keep squash merge enabled.
+3. Set **Default commit message** for squash merges to **Pull request title and description**.
+4. Confirm `.github/workflows/add-entire-checkpoints-to-pr-body.yml` is present on the default branch.
+
+Why this is required:
+
+- The workflow scans commit messages in the PR and finds lines that start with `Entire-Checkpoint:`.
+- It writes or refreshes the `Entire checkpoints` section in the PR body.
+- Squash merge includes that PR body section in the final commit message only when the default mode is **Pull request title and description**.
+
+Operational notes:
+
+- The workflow uses marker comments (`<!-- entire-checkpoints:start -->` and `<!-- entire-checkpoints:end -->`) and replaces only that range.
+- Maintainer-written parts of the PR description stay untouched.
+- The workflow runs on `pull_request` events: `opened`, `synchronize`, `edited`, and `reopened`.
+- If your organization restricts allowed actions, add `actions/github-script` to the allowlist.

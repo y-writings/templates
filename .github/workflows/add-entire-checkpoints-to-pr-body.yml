@@ -1,0 +1,71 @@
+name: Add Entire checkpoints to PR body
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  update-pr-body:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect checkpoints and update PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const markerStart = "<!-- entire-checkpoints:start -->";
+            const markerEnd = "<!-- entire-checkpoints:end -->";
+            const heading = "## Entire checkpoints";
+
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+            const currentBody = context.payload.pull_request.body || "";
+
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100,
+            });
+
+            const checkpoints = [...new Set(
+              commits
+                .flatMap((c) => (c.commit.message || "").split(/\r?\n/))
+                .map((line) => line.trim())
+                .filter((line) => /^Entire-Checkpoint:\s*\S+/.test(line))
+            )].sort((a, b) => a.localeCompare(b));
+
+            const section = [
+              markerStart,
+              heading,
+              "",
+              checkpoints.length > 0
+                ? checkpoints.map((line) => `- \`${line}\``).join("\n")
+                : "_No Entire checkpoints found._",
+              markerEnd,
+            ].join("\n");
+
+            const escapedStart = markerStart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const escapedEnd = markerEnd.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const markerRegex = new RegExp(`${escapedStart}[\\s\\S]*?${escapedEnd}`, "m");
+
+            const updatedBody = markerRegex.test(currentBody)
+              ? currentBody.replace(markerRegex, section)
+              : `${currentBody.trim()}\n\n${section}`.trim();
+
+            if (updatedBody === currentBody) {
+              core.info("PR body already up-to-date.");
+              return;
+            }
+
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number,
+              body: updatedBody,
+            });
+
+            core.info(`Updated PR #${pull_number} with ${checkpoints.length} checkpoint(s).`);
