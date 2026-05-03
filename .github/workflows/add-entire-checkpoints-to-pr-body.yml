@@ -13,82 +13,59 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Collect checkpoints and update PR body
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_BODY: ${{ github.event.pull_request.body }}
-          API_URL: ${{ github.api_url }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          import re
-          import urllib.request
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        with:
+          script: |
+            const markerStart = "<!-- entire-checkpoints:start -->";
+            const markerEnd = "<!-- entire-checkpoints:end -->";
+            const heading = "## Entire checkpoints";
 
-          marker_start = "<!-- entire-checkpoints:start -->"
-          marker_end = "<!-- entire-checkpoints:end -->"
-          heading = "## Entire checkpoints"
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+            const currentBody = context.payload.pull_request.body || "";
 
-          repo = os.environ["REPO"]
-          pr_number = os.environ["PR_NUMBER"]
-          current_body = os.environ.get("PR_BODY") or ""
-          api_url = os.environ["API_URL"]
-          token = os.environ["GITHUB_TOKEN"]
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100,
+            });
 
-          def request_json(url: str, method: str = "GET", payload: dict | None = None):
-            headers = {
-              "Authorization": f"Bearer {token}",
-              "Accept": "application/vnd.github+json",
-              "X-GitHub-Api-Version": "2022-11-28",
-              "User-Agent": "entire-checkpoints-workflow",
+            const checkpoints = [...new Set(
+              commits
+                .flatMap((c) => (c.commit.message || "").split(/\r?\n/))
+                .map((line) => line.trim())
+                .filter((line) => /^Entire-Checkpoint:\s*\S+/.test(line))
+            )].sort((a, b) => a.localeCompare(b));
+
+            const section = [
+              markerStart,
+              heading,
+              "",
+              checkpoints.length > 0
+                ? checkpoints.map((line) => `- \`${line}\``).join("\n")
+                : "_No Entire checkpoints found._",
+              markerEnd,
+            ].join("\n");
+
+            const escapedStart = markerStart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const escapedEnd = markerEnd.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const markerRegex = new RegExp(`${escapedStart}[\\s\\S]*?${escapedEnd}`, "m");
+
+            const updatedBody = markerRegex.test(currentBody)
+              ? currentBody.replace(markerRegex, section)
+              : `${currentBody.trim()}\n\n${section}`.trim();
+
+            if (updatedBody === currentBody) {
+              core.info("PR body already up-to-date.");
+              return;
             }
-            body = None
-            if payload is not None:
-              body = json.dumps(payload).encode("utf-8")
-              headers["Content-Type"] = "application/json"
-            req = urllib.request.Request(url, data=body, headers=headers, method=method)
-            with urllib.request.urlopen(req) as res:
-              return json.loads(res.read().decode("utf-8"))
 
-          commits = []
-          page = 1
-          while True:
-            url = f"{api_url}/repos/{repo}/pulls/{pr_number}/commits?per_page=100&page={page}"
-            chunk = request_json(url)
-            if not chunk:
-              break
-            commits.extend(chunk)
-            if len(chunk) < 100:
-              break
-            page += 1
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number,
+              body: updatedBody,
+            });
 
-          checkpoints = sorted({
-            line.strip()
-            for commit in commits
-            for line in (commit.get("commit", {}).get("message", "").splitlines())
-            if re.match(r"^Entire-Checkpoint:\s*\S+", line.strip())
-          })
-
-          section_lines = [marker_start, heading, ""]
-          if checkpoints:
-            section_lines.extend([f"- `{line}`" for line in checkpoints])
-          else:
-            section_lines.append("_No Entire checkpoints found._")
-          section_lines.append(marker_end)
-          section = "\n".join(section_lines)
-
-          marker_re = re.compile(re.escape(marker_start) + r"[\s\S]*?" + re.escape(marker_end), re.MULTILINE)
-          if marker_re.search(current_body):
-            updated_body = marker_re.sub(section, current_body)
-          else:
-            updated_body = (current_body.strip() + "\n\n" + section).strip()
-
-          if updated_body == current_body:
-            print("PR body already up-to-date.")
-            raise SystemExit(0)
-
-          update_url = f"{api_url}/repos/{repo}/pulls/{pr_number}"
-          request_json(update_url, method="PATCH", payload={"body": updated_body})
-          print(f"Updated PR #{pr_number} with {len(checkpoints)} checkpoint(s).")
-          PY
+            core.info(`Updated PR #${pull_number} with ${checkpoints.length} checkpoint(s).`);
