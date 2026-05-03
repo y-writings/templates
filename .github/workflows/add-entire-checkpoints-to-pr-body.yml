@@ -22,18 +22,45 @@ jobs:
 
             const { owner, repo } = context.repo;
             const pull_number = context.payload.pull_request.number;
-            const currentBody = context.payload.pull_request.body || "";
 
-            const commits = await github.paginate(github.rest.pulls.listCommits, {
-              owner,
-              repo,
-              pull_number,
-              per_page: 100,
-            });
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number });
+            const currentBody = pr.body || "";
+
+            const query = `
+              query($owner: String!, $repo: String!, $pullNumber: Int!, $cursor: String) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pullNumber) {
+                    commits(first: 100, after: $cursor) {
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
+                      nodes {
+                        commit {
+                          message
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const messages = [];
+            let cursor = null;
+            while (true) {
+              const res = await github.graphql(query, { owner, repo, pullNumber: pull_number, cursor });
+              const commits = res.repository.pullRequest.commits;
+              for (const node of commits.nodes) {
+                messages.push(node.commit.message || "");
+              }
+              if (!commits.pageInfo.hasNextPage) break;
+              cursor = commits.pageInfo.endCursor;
+            }
 
             const checkpoints = [...new Set(
-              commits
-                .flatMap((c) => (c.commit.message || "").split(/\r?\n/))
+              messages
+                .flatMap((message) => message.split(/\r?\n/))
                 .map((line) => line.trim())
                 .filter((line) => /^Entire-Checkpoint:\s*\S+/.test(line))
             )].sort((a, b) => a.localeCompare(b));
@@ -61,11 +88,5 @@ jobs:
               return;
             }
 
-            await github.rest.pulls.update({
-              owner,
-              repo,
-              pull_number,
-              body: updatedBody,
-            });
-
+            await github.rest.pulls.update({ owner, repo, pull_number, body: updatedBody });
             core.info(`Updated PR #${pull_number} with ${checkpoints.length} checkpoint(s).`);
