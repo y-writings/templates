@@ -114,5 +114,4 @@ Operational notes:
 
 - The workflow uses marker comments (`<!-- entire-checkpoints:start -->` and `<!-- entire-checkpoints:end -->`) and replaces only that range.
 - Maintainer-written parts of the PR description stay untouched.
-- The workflow runs on `pull_request` events: `opened`, `synchronize`, `edited`, and `reopened`.
-- If your organization restricts allowed actions, add `actions/github-script` to the allowlist.
+- The workflow runs on `pull_request_target` events: `opened`, `synchronize`, `edited`, and `reopened`.
