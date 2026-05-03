@@ -31,5 +31,11 @@ templates:
   - id: LICENSE
     source: LICENSE
     target: LICENSE
+  - id: entire-gitignore
+    source: .entire/.gitignore
+    target: .entire/.gitignore
+  - id: entire-settings-json
+    source: .entire/settings.json
+    target: .entire/settings.json
 gitignore:
   - .gh

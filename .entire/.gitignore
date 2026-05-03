@@ -1,0 +1,5 @@
+tmp/
+# This is intentionally commented out.
+# settings.local.json
+metadata/
+logs/
