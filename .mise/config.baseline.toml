@@ -1,11 +1,11 @@
-[settings]
-experimental = true
-
-[hooks]
-enter = "if [ -f lefthook.yaml ]; then lefthook install; fi"
-
 [env]
 GH_CONFIG_DIR="{{config_root}}/.gh"
+
+[tasks."baseline:setup"]
+run = [
+    "lefthook install",
+    "entire enable --agent opencode"
+]
 
 [tasks."baseline:pin"]
 description = "Pin repository references with pinact and dockerfile-pin"
