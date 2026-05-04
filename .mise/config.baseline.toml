@@ -28,8 +28,8 @@ set -euo pipefail
 git rev-parse --is-inside-work-tree >/dev/null
 git config --local --unset-all core.hooksPath || true
 
-git_dir="$(git rev-parse --absolute-git-dir)"
-hooks_dir="$git_dir/hooks"
+common_git_dir="$(git rev-parse --path-format=absolute --git-common-dir)"
+hooks_dir="$common_git_dir/hooks"
 rm -rf -- "$hooks_dir"
 mkdir -p -- "$hooks_dir"
 '''
