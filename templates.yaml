@@ -9,6 +9,9 @@ templates:
   - id: github-workflow-semantic-pr
     source: .github/workflows/semantic-pr.yaml
     target: .github/workflows/semantic-pr.yaml
+  - id: github-workflow-add-entire-checkpoints-to-pr-body
+    source: .github/workflows/add-entire-checkpoints-to-pr-body.yaml
+    target: .github/workflows/add-entire-checkpoints-to-pr-body.yaml
   - id: commitlint
     source: .commitlintrc.yaml
     target: .commitlintrc.yaml

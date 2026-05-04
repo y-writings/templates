@@ -51,7 +51,7 @@ jobs:
               heading,
               "",
               checkpoints.length > 0
-                ? checkpoints.map((line) => `- \`${line}\``).join("\n")
+                ? checkpoints.join("\n")
                 : "_No Entire checkpoints found._",
               markerEnd,
             ].join("\n");
