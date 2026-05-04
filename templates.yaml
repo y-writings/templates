@@ -40,5 +40,9 @@ templates:
   - id: entire-settings-json
     source: .entire/settings.json
     target: .entire/settings.json
+  - id: entire-entire-ts
+    source: .opencode/plugins/entire.ts
+    target: .opencode/plugins/entire.ts
 gitignore:
   - .gh
+  - .opencode/plugins/entire.ts
