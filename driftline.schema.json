@@ -1,13 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "./templates.schema.json",
+  "$id": "./driftline.schema.json",
   "title": "Template sync configuration",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "version",
-    "templates"
-  ],
+  "required": ["version", "files"],
   "properties": {
     "$schema": {
       "type": "string",
@@ -19,7 +16,7 @@
       "const": 1,
       "description": "Configuration schema version."
     },
-    "templates": {
+    "files": {
       "type": "array",
       "description": "Templates to synchronize from source into target repositories.",
       "items": {
@@ -39,11 +36,7 @@
     "template": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "id",
-        "source",
-        "target"
-      ],
+      "required": ["id", "source", "target"],
       "properties": {
         "id": {
           "type": "string",
