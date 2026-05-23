@@ -1,8 +1,8 @@
-# yaml-language-server: $schema=./templates.schema.json
+# yaml-language-server: $schema=./driftline.schema.json
 version: 1
-$schema: ./templates.schema.json
+$schema: ./driftline.schema.json
 
-templates:
+files:
   - id: github-workflow-scan
     source: .github/workflows/scan.yaml
     target: .github/workflows/scan.yaml
