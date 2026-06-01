@@ -2,6 +2,92 @@
 
 All notable weekly snapshots of this project are documented in this file.
 
+## v2026.06.01
+
+
+
+### Chores
+
+- Ignore local entire redactors (#33)
+
+- Remove template sync CLI (#34)
+
+- Rename driftline config (#35)
+
+
+
+## v2026.05.18
+
+
+
+### Bug Fixes
+
+- Restrict hook reset to repo-local directory (#32)
+
+
+
+### Features
+
+- Add entire opencode plugin template (#31)
+
+
+
+## v2026.05.04
+
+
+
+### CI
+
+- Add workflow to sync `Entire-Checkpoint:` lines into PR body for squash commit messages (#28)
+
+- Render entire checkpoints as plain lines (#29)
+
+
+
+### Chores
+
+- Fix mise pin task description (#15)
+
+- Configure local gh config directory (#16)
+
+- Split mise config by environment (#20)
+
+- Add YAML schema editor directive (#23)
+
+
+
+### Documentation
+
+- **changelog:** Update changelog (#14)
+
+- Add template sync design (#17)
+
+- Document template sync CLI (#26)
+
+- Shorten README (#27)
+
+
+
+### Features
+
+- Add Go template sync CLI (#18)
+
+- **template-sync:** Add gitignore sync entries and if_not_exists mode (#21)
+
+- Add JSON Schema support for templates.yaml (#22)
+
+- Add mise template entries (#24)
+
+- Add entire template setup (#25)
+
+
+
+### Refactoring
+
+- Split template sync commands package (#19)
+
+
+
 ## v2026.04.27
 
 
