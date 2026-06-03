@@ -1,4 +1,4 @@
-name: scan
+name: "[00] Security scan"
 
 on:
   pull_request:

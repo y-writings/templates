@@ -1,15 +1,18 @@
 version: 1
 
 files:
-  - id: github-workflow-scan
-    source: .github/workflows/scan.yaml
-    target: .github/workflows/scan.yaml
-  - id: github-workflow-semantic-pr
-    source: .github/workflows/semantic-pr.yaml
-    target: .github/workflows/semantic-pr.yaml
-  - id: github-workflow-add-entire-checkpoints-to-pr-body
-    source: .github/workflows/add-entire-checkpoints-to-pr-body.yaml
-    target: .github/workflows/add-entire-checkpoints-to-pr-body.yaml
+  - id: github-workflow-entire-checkpoint-collection
+    source: .github/workflows/00-entire-checkpoint-collection.yaml
+    target: .github/workflows/00-entire-checkpoint-collection.yaml
+  - id: github-workflow-security-scan
+    source: .github/workflows/00-security-scan.yaml
+    target: .github/workflows/00-security-scan.yaml
+  - id: github-workflow-semantic-pr-check
+    source: .github/workflows/00-semantic-pr-check.yaml
+    target: .github/workflows/00-semantic-pr-check.yaml
+  - id: github-workflow-weekly-merged-prs-report
+    source: .github/workflows/00-weekly-merged-prs-report.yaml
+    target: .github/workflows/00-weekly-merged-prs-report.yaml
   - id: commitlint
     source: .commitlintrc.yaml
     target: .commitlintrc.yaml
