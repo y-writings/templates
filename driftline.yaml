@@ -1,6 +1,4 @@
-# yaml-language-server: $schema=./driftline.schema.json
 version: 1
-$schema: ./driftline.schema.json
 
 files:
   - id: github-workflow-scan
