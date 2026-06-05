@@ -1,2 +1,2 @@
-[tools]
-go = "1.22.12"
+# This TOML file contains project-specific settings.
+# Add project-specific information here.
