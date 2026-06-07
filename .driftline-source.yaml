@@ -2,35 +2,37 @@
 version: 1
 
 files:
-  - id: github-workflow-entire-checkpoint-collection
-    source_path: .github/workflows/00-entire-checkpoint-collection.yaml
-  - id: github-workflow-security-scan
-    source_path: .github/workflows/00-security-scan.yaml
-  - id: github-workflow-semantic-pr-check
-    source_path: .github/workflows/00-semantic-pr-check.yaml
-  - id: github-workflow-weekly-merged-prs-report
-    source_path: .github/workflows/00-weekly-merged-prs-report.yaml
+  - id: github-workflows
+    paths:
+      - .github/workflows/00-entire-checkpoint-collection.yaml
+      - .github/workflows/00-security-scan.yaml
+      - .github/workflows/00-semantic-pr-check.yaml
+      - .github/workflows/00-weekly-merged-prs-report.yaml
   - id: commitlint
-    source_path: .commitlintrc.yaml
+    paths:
+      - .commitlintrc.yaml
   - id: lefthook
-    source_path: lefthook.yaml
+    paths:
+      - lefthook.yaml
   - id: pinact
-    source_path: .pinact.yaml
-  - id: mise-baseline
-    source_path: .mise/config.baseline.toml
+    paths:
+      - .pinact.yaml
+  - id: mise
+    paths:
+      - .mise/config.baseline.toml
+      - .miserc.toml
   - id: mise-project
-    source_path: .mise/config.toml
+    paths:
+      - .mise/config.toml
     if_not_exists: true
-  - id: mise-rc
-    source_path: .miserc.toml
   - id: LICENSE
-    source_path: LICENSE
-  - id: entire-gitignore
-    source_path: .entire/.gitignore
-  - id: entire-settings-json
-    source_path: .entire/settings.json
-  - id: entire-entire-ts
-    source_path: .opencode/plugins/entire.ts
+    paths:
+      - LICENSE
+  - id: entire
+    paths:
+      - .entire/.gitignore
+      - .entire/settings.json
+      - .opencode/plugins/entire.ts
 gitignore:
   - .gh
   - .opencode/plugins/entire.ts
