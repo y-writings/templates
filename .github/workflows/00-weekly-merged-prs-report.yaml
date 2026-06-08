@@ -25,13 +25,13 @@ jobs:
     steps:
       - name: Create pull request creator GitHub App token
         id: pr-creator-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ vars.PR_CREATOR_APP_ID }}
           private-key: ${{ secrets.PR_CREATOR_APP_PRIVATE_KEY }}
 
       - name: Check out repository for changelog generation
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: main
           fetch-depth: 0
@@ -40,7 +40,7 @@ jobs:
 
       - name: Create weekly CalVer tag through GitHub API
         id: calver-tag
-        uses: y-writings/calver-beacon-action@0ba68eee60be71b3549212bf896fac07df928d4d # v2026.05.25
+        uses: y-writings/calver-beacon-action@eb507d5eb0ee75d500a9e0b2e6f7dba91e48f9ed # v2026.06.08
         with:
           calver_date: ${{ inputs.calver_date }}
           tag_prefix: weekly-
@@ -64,7 +64,7 @@ jobs:
 
       - name: Generate WEEKLY_MERGED_PULL_REQUESTS.md from release tag range
         if: ${{ steps.calver-tag.outputs.created == 'true' }}
-        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        uses: orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
         with:
           config: cliff.toml
           args: --verbose --tag ${{ steps.calver-tag.outputs.tag }} --output WEEKLY_MERGED_PULL_REQUESTS.md ${{ steps.cliff-range.outputs.range }}
@@ -94,7 +94,7 @@ jobs:
       - name: Create changelog approver GitHub App token
         id: approver-token
         if: ${{ steps.changelog-pull-request.outputs.pull-request-number != '' }}
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           app-id: ${{ vars.PR_APPROVER_APP_ID }}
           private-key: ${{ secrets.PR_APPROVER_APP_PRIVATE_KEY }}
