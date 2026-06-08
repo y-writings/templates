@@ -14,8 +14,34 @@ run = [
 ]
 
 [tasks."00:pin"]
+description = "Run repository pinning maintenance tasks"
+usage = '''
+arg "<command>" {
+  choices "fix" "update:pinact" "update:docker-pin"
+}
+'''
+run = '''
+case "${usage_command?}" in
+  fix)               mise run 00:pin:fix ;;
+  update:pinact)     mise run 00:pin:update:pinact ;;
+  update:docker-pin) mise run 00:pin:update:docker-pin ;;
+esac
+'''
+
+[tasks."00:pin:fix"]
+hide = true
 description = "Pin repository references with pinact and dockerfile-pin"
 run = ["pinact run --check --fix", "dockerfile-pin run --write"]
+
+[tasks."00:pin:update:pinact"]
+hide = true
+description = "Update GitHub Actions references with pinact"
+run = ["pinact run -update"]
+
+[tasks."00:pin:update:docker-pin"]
+hide = true
+description = "Update pinned Docker image digests with dockerfile-pin"
+run = ["dockerfile-pin run --write --update"]
 
 [tasks."00:scan"]
 description = "Scan all repository files with betterleaks"
