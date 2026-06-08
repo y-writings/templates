@@ -16,12 +16,13 @@ run = [
 [tasks."00:pin"]
 description = "Run repository pinning maintenance tasks"
 usage = '''
-arg "<command>" {
+arg "[command]" {
   choices "fix" "update:pinact" "update:docker-pin"
 }
 '''
 run = '''
-case "${usage_command?}" in
+case "${usage_command:-}" in
+  "")                mise run 00:pin --help; exit 1 ;;
   fix)               mise run 00:pin:fix ;;
   update:pinact)     mise run 00:pin:update:pinact ;;
   update:docker-pin) mise run 00:pin:update:docker-pin ;;
