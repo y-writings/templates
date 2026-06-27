@@ -1,31 +1,36 @@
-## Purpose
+# Pull Request
+
+## Why
+
 <!--
-なぜこのPull Requestが必要だったのかを書いてください。
-- 「何を変更したか」ではなく「なぜ必要だったか」を中心に書きます
-- 背景・課題・目的が伝わる内容にします
-- 1行〜3行で簡潔に書いてください
-
-良い例:
-- 既存のテンプレート管理手順が分散しており、更新漏れが起きやすかったため、運用を一本化する必要がありました。
-
-避けたい例:
-- READMEを更新しました
-- ファイルを追加しました
+なぜ必要かを1〜3行で記載してください。
+Describe why this is needed in 1-3 lines.
 -->
-[このPull Requestが必要になった背景・目的を1行〜3行で記載]
 
-## Release Notes
+### Why / 日本語
+
+[このPull Requestが必要になった背景・目的]
+
+### Why / English
+
+[Background and purpose of this pull request]
+
+## What Changed
+
 <!--
-このPull Requestがマージされたあと、利用者や運用にとって何が変わるかを書いてください。
-- Release Notes / CHANGELOG にそのまま載る前提で書きます
-- 実装作業の説明ではなく、マージ後の変化・効果を書きます
-- 1行〜3行で簡潔に書いてください
-
-良い例:
-- Pull Request テンプレートが追加され、Purpose と Release Notes を統一フォーマットで記載できるようになります。
-
-避けたい例:
-- PRテンプレート用のMarkdownファイルを作成しました
-- コメントをたくさん追加しました
+何をどう変更したかを1〜3行で記載してください。
+Describe what changed and how in 1-3 lines.
 -->
-[マージ後に何が変わるかを1行〜3行で記載]
+
+### What Changed / 日本語
+
+[変更内容と実装概要]
+
+### What Changed / English
+
+[What changed and how it was implemented]
+
+---
+
+<!-- これより下はGitHub Actionsなどでメタデータが挿入される場合があります。 -->
+<!-- Metadata may be inserted below by GitHub Actions or other automation. -->
