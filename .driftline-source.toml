@@ -1,0 +1,31 @@
+version = 2
+
+[files.github-workflows]
+entire-checkpoint-collection = { path = ".github/workflows/00-entire-checkpoint-collection.yaml", mode = "managed" }
+security-scan = { path = ".github/workflows/00-security-scan.yaml", mode = "managed" }
+semantic-pr-check = { path = ".github/workflows/00-semantic-pr-check.yaml", mode = "managed" }
+weekly-merged-prs-report = { path = ".github/workflows/00-weekly-merged-prs-report.yaml", mode = "managed" }
+
+[files.commitlint]
+config = { path = ".commitlintrc.yaml", mode = "managed" }
+
+[files.lefthook]
+config = { path = "lefthook.yaml", mode = "managed" }
+
+[files.pinact]
+config = { path = ".pinact.yaml", mode = "managed" }
+
+[files.mise]
+baseline = { path = ".mise/config.baseline.toml", mode = "managed" }
+miserc = { path = ".miserc.toml", mode = "managed" }
+
+[files.mise-project]
+config = { path = ".mise/config.toml", mode = "template" }
+
+[files.LICENSE]
+license = { path = "LICENSE", mode = "managed" }
+
+[files.entire]
+gitignore = { path = ".entire/.gitignore", mode = "managed" }
+settings = { path = ".entire/settings.json", mode = "managed" }
+opencode-plugin = { path = ".opencode/plugins/entire.ts", mode = "managed" }
