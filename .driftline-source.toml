@@ -1,10 +1,16 @@
 version = 2
 
 [files.github-workflows]
-entire-checkpoint-collection = { path = ".github/workflows/00-entire-checkpoint-collection.yaml", mode = "managed" }
+entire-checkpoint-collection = {
+  path = ".github/workflows/00-entire-checkpoint-collection.yaml",
+  mode = "managed"
+}
 security-scan = { path = ".github/workflows/00-security-scan.yaml", mode = "managed" }
 semantic-pr-check = { path = ".github/workflows/00-semantic-pr-check.yaml", mode = "managed" }
-weekly-merged-prs-report = { path = ".github/workflows/00-weekly-merged-prs-report.yaml", mode = "managed" }
+weekly-merged-prs-report = {
+  path = ".github/workflows/00-weekly-merged-prs-report.yaml",
+  mode = "managed"
+}
 
 [files.commitlint]
 config = { path = ".commitlintrc.yaml", mode = "managed" }
