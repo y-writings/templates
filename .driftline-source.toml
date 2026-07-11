@@ -12,6 +12,9 @@ weekly-merged-prs-report = {
   mode = "managed"
 }
 
+[files.github]
+pull-request-template = { path = ".github/pull_request_template.md", mode = "managed" }
+
 [files.commitlint]
 config = { path = ".commitlintrc.yaml", mode = "managed" }
 
