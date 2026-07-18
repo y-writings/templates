@@ -23,7 +23,7 @@ commitlint = { path = ".commitlintrc.yaml", mode = "managed" }
 lefthook = { path = "lefthook.yaml", mode = "managed" }
 pinact = { path = ".pinact.yaml", mode = "managed" }
 tombi = { path = "tombi.toml", mode = "managed" }
-cliff = { path = "cliff.toml", mode = "managed" }
+cliff = { path = "cliff.toml", mode = "template" }
 
 [files.LICENSE]
 license = { path = "LICENSE", mode = "managed" }
