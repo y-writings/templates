@@ -39,16 +39,17 @@ characters, including spaces and punctuation.
 ## Verification
 
 <!--
-日本語で実施した確認と結果を記載してください。未確認の場合は、その理由を記載してください。
+実施した確認と結果を、日本語または英語の好きな方で箇条書きにしてください。翻訳は不要です。
+未確認の場合は、その理由を箇条書きで記載してください。
+
+List the verification steps and results as bullet points in either Japanese or
+English. No translation is required.
+If the change was not verified, provide the reason as a bullet point.
+
+例 / Example:
+- Unit tests passed
+- Confirmed the behavior manually
 -->
-
-[日本語の確認内容]
-
-<!--
-Describe the verification and results in English. If not verified, explain why.
--->
-
-[Verification in English]
 
 ---
 
