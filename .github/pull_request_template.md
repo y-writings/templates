@@ -1,36 +1,75 @@
-# Pull Request
-
-## Why
-
 <!--
-なぜ必要かを1〜3行で記載してください。
-Describe why this is needed in 1-3 lines.
+記入ルール:
+- タイトルは日本語または英語のどちらか一方で記載する
+- MotivationとWhat Changedは、日本語版と英語版の両方を記載する
+- 各言語版は、それぞれ150文字以内とする
+- 日本語版と英語版には同じ情報を記載する（逐語訳でなくてもよい）
+- Verificationは、日本語または英語のどちらか一方で箇条書きにする
+
+提出前に、プレースホルダーと案内用のHTMLコメントを削除してください。
+AUTO-GENERATED METADATAコメントは削除しないでください。
+
+Guidelines:
+- Write the title in either Japanese or English
+- Provide both Japanese and English versions of Motivation and What Changed
+- Keep each language version within 150 characters
+- Provide equivalent information in both languages; a literal translation is
+  not required
+- Write Verification as bullet points in either Japanese or English
+
+Before submitting, remove all placeholders and instructional HTML comments.
+Do not remove the AUTO-GENERATED METADATA comment.
 -->
 
-### Why / 日本語
+# [タイトル / Title]
 
-[このPull Requestが必要になった背景・目的]
+## Motivation
 
-### Why / English
+<!--
+日本語で変更の背景と目的を150文字以内で記載してください（空白・記号を含む）。
+-->
 
-[Background and purpose of this pull request]
+[日本語のMotivation]
+
+<!--
+Describe the background and purpose in English within 150 characters,
+including spaces and punctuation.
+-->
+
+[Motivation in English]
 
 ## What Changed
 
 <!--
-何をどう変更したかを1〜3行で記載してください。
-Describe what changed and how in 1-3 lines.
+日本語で変更内容と実装方法を150文字以内で記載してください（空白・記号を含む）。
 -->
 
-### What Changed / 日本語
+[日本語の変更内容]
 
-[変更内容と実装概要]
+<!--
+Describe what changed and how it was implemented in English within 150
+characters, including spaces and punctuation.
+-->
 
-### What Changed / English
+[Changes in English]
 
-[What changed and how it was implemented]
+## Verification
+
+<!--
+実施した確認と結果を、日本語または英語の好きな方で箇条書きにしてください。翻訳は不要です。
+未確認の場合は、その理由を箇条書きで記載してください。
+
+List the verification steps and results as bullet points in either Japanese or
+English. No translation is required.
+If the change was not verified, provide the reason as a bullet point.
+
+例 / Example:
+- Unit tests passed
+- Confirmed the behavior manually
+-->
+
+- [確認内容と結果 / Verification step and result]
 
 ---
 
-<!-- これより下はGitHub Actionsなどでメタデータが挿入される場合があります。 -->
-<!-- Metadata may be inserted below by GitHub Actions or other automation. -->
+<!-- AUTO-GENERATED METADATA: DO NOT EDIT BELOW THIS LINE -->
