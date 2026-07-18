@@ -1,10 +1,27 @@
 <!--
-日本語版と英語版には同じ内容を記載してください。逐語訳である必要はありません。
-Provide the same information in Japanese and English. A literal translation is
-not required.
+記入ルール:
+- タイトルは日本語または英語のどちらか一方で記載する
+- MotivationとWhat Changedは、日本語版と英語版の両方を記載する
+- 各言語版は、それぞれ150文字以内とする
+- 日本語版と英語版には同じ情報を記載する（逐語訳でなくてもよい）
+- Verificationは、日本語または英語のどちらか一方で箇条書きにする
+
+提出前に、プレースホルダーと案内用のHTMLコメントを削除してください。
+AUTO-GENERATED METADATAコメントは削除しないでください。
+
+Guidelines:
+- Write the title in either Japanese or English
+- Provide both Japanese and English versions of Motivation and What Changed
+- Keep each language version within 150 characters
+- Provide equivalent information in both languages; a literal translation is
+  not required
+- Write Verification as bullet points in either Japanese or English
+
+Before submitting, remove all placeholders and instructional HTML comments.
+Do not remove the AUTO-GENERATED METADATA comment.
 -->
 
-# [日本語タイトル / English title]
+# [タイトル / Title]
 
 ## Motivation
 
@@ -50,6 +67,8 @@ If the change was not verified, provide the reason as a bullet point.
 - Unit tests passed
 - Confirmed the behavior manually
 -->
+
+- [確認内容と結果 / Verification step and result]
 
 ---
 
