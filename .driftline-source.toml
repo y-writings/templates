@@ -1,6 +1,6 @@
 version = 2
 
-[files.github-workflows]
+[files.github]
 entire-checkpoint-collection = {
   path = ".github/workflows/00-entire-checkpoint-collection.yaml",
   mode = "managed"
@@ -11,25 +11,19 @@ weekly-merged-prs-report = {
   path = ".github/workflows/00-weekly-merged-prs-report.yaml",
   mode = "managed"
 }
-
-[files.github]
 pull-request-template = { path = ".github/pull_request_template.md", mode = "managed" }
 
-[files.commitlint]
-config = { path = ".commitlintrc.yaml", mode = "managed" }
-
-[files.lefthook]
-config = { path = "lefthook.yaml", mode = "managed" }
-
-[files.pinact]
-config = { path = ".pinact.yaml", mode = "managed" }
-
 [files.mise]
-baseline = { path = ".mise/config.baseline.toml", mode = "managed" }
 miserc = { path = ".miserc.toml", mode = "managed" }
+baseline-config = { path = ".mise/config.baseline.toml", mode = "managed" }
+project-config = { path = ".mise/config.toml", mode = "template" }
 
-[files.mise-project]
-config = { path = ".mise/config.toml", mode = "template" }
+[files.configs]
+commitlint = { path = ".commitlintrc.yaml", mode = "managed" }
+lefthook = { path = "lefthook.yaml", mode = "managed" }
+pinact = { path = ".pinact.yaml", mode = "managed" }
+tombi = { path = "tombi.toml", mode = "managed" }
+cliff = { path = "cliff.toml", mode = "template" }
 
 [files.LICENSE]
 license = { path = "LICENSE", mode = "managed" }
