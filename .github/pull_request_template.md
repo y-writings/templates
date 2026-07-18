@@ -1,36 +1,55 @@
-# Pull Request
-
-## Why
-
 <!--
-なぜ必要かを1〜3行で記載してください。
-Describe why this is needed in 1-3 lines.
+日本語版と英語版には同じ内容を記載してください。逐語訳である必要はありません。
+Provide the same information in Japanese and English. A literal translation is
+not required.
 -->
 
-### Why / 日本語
+# [日本語タイトル / English title]
 
-[このPull Requestが必要になった背景・目的]
+## Motivation
 
-### Why / English
+<!--
+日本語で変更の背景と目的を150文字以内で記載してください（空白・記号を含む）。
+-->
 
-[Background and purpose of this pull request]
+[日本語のMotivation]
+
+<!--
+Describe the background and purpose in English within 150 characters,
+including spaces and punctuation.
+-->
+
+[Motivation in English]
 
 ## What Changed
 
 <!--
-何をどう変更したかを1〜3行で記載してください。
-Describe what changed and how in 1-3 lines.
+日本語で変更内容と実装方法を150文字以内で記載してください（空白・記号を含む）。
 -->
 
-### What Changed / 日本語
+[日本語の変更内容]
 
-[変更内容と実装概要]
+<!--
+Describe what changed and how it was implemented in English within 150
+characters, including spaces and punctuation.
+-->
 
-### What Changed / English
+[Changes in English]
 
-[What changed and how it was implemented]
+## Verification
+
+<!--
+日本語で実施した確認と結果を記載してください。未確認の場合は、その理由を記載してください。
+-->
+
+[日本語の確認内容]
+
+<!--
+Describe the verification and results in English. If not verified, explain why.
+-->
+
+[Verification in English]
 
 ---
 
-<!-- これより下はGitHub Actionsなどでメタデータが挿入される場合があります。 -->
-<!-- Metadata may be inserted below by GitHub Actions or other automation. -->
+<!-- AUTO-GENERATED METADATA: DO NOT EDIT BELOW THIS LINE -->
