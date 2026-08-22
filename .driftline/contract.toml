@@ -1,5 +1,11 @@
 version = 2
 
+[gitignore]
+entries = [
+  ".gh",
+  ".opencode/plugins/entire.ts",
+]
+
 [files.github]
 entire-checkpoint-collection = {
   path = ".github/workflows/00-entire-checkpoint-collection.yaml",
