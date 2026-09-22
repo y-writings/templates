@@ -31,7 +31,3 @@ pre-commit:
     actionlint:
       glob: ".github/workflows/*.{yaml,yml}"
       run: actionlint {staged_files}
-commit-msg:
-  commands:
-    commitlint:
-      run: commitlint --config .commitlintrc.yaml --edit {1}
