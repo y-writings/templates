@@ -8,10 +8,7 @@ jobs:
   approve:
     name: Approve pull request
     if: >-
-      github.event.issue.pull_request &&
-      github.event.issue.state == 'open' &&
-      github.event.comment.user.login == 'y-writings' &&
-      github.event.comment.body == 'approve'
+      github.event.issue.pull_request && github.event.issue.state == 'open' && github.event.comment.user.login == 'y-writings' && github.event.comment.body == 'approve'
     runs-on: ubuntu-latest
     steps:
       - name: Create approver GitHub App token
@@ -22,7 +19,7 @@ jobs:
           private-key: ${{ secrets.PR_APPROVER_APP_PRIVATE_KEY }}
           permission-pull-requests: write
       - name: Approve pull request
-        uses: hmarr/auto-approve-action@25d7ce3 # v4.0.0
+        uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
         with:
           pull-request-number: ${{ github.event.issue.number }}
           github-token: ${{ steps.approver-token.outputs.token }}
