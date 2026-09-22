@@ -36,6 +36,9 @@ cliff = { path = "cliff.toml", mode = "template" }
 [files.LICENSE]
 license = { path = "LICENSE", mode = "managed" }
 
+[files.CONTRIBUTING]
+contributing = { path = "CONTRIBUTING.md", mode = "managed" }
+
 [files.entire]
 gitignore = { path = ".entire/.gitignore", mode = "managed" }
 settings = { path = ".entire/settings.json", mode = "managed" }
