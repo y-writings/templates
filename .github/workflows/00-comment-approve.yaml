@@ -1,0 +1,28 @@
+name: "[00] Approve pull request from comment"
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  approve:
+    name: Approve pull request
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.issue.state == 'open' &&
+      github.event.comment.user.login == 'y-writings' &&
+      github.event.comment.body == 'approve'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create approver GitHub App token
+        id: approver-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.PR_APPROVER_APP_ID }}
+          private-key: ${{ secrets.PR_APPROVER_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+      - name: Approve pull request
+        uses: hmarr/auto-approve-action@25d7ce3 # v4.0.0
+        with:
+          pull-request-number: ${{ github.event.issue.number }}
+          github-token: ${{ steps.approver-token.outputs.token }}
