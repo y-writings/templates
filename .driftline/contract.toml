@@ -11,7 +11,7 @@ entire-checkpoint-collection = {
   path = ".github/workflows/00-entire-checkpoint-collection.yaml",
   mode = "managed"
 }
-pr-diff-groups = { path = ".github/pr-diff-groups.json", mode = "managed" }
+pr-diff-groups = { path = ".github/pr-diff-groups.json", mode = "template" }
 pr-diff-statistics = { path = ".github/workflows/pr-diff-statistics.yml", mode = "managed" }
 security-scan = { path = ".github/workflows/00-security-scan.yaml", mode = "managed" }
 semantic-pr-check = { path = ".github/workflows/00-semantic-pr-check.yaml", mode = "managed" }
