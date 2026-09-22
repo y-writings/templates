@@ -26,7 +26,7 @@ All notable weekly snapshots of this project are documented in this file.
 
 - Add repository scan workflow and local scan tooling (#1)
 
-- Add commitlint hook and semantic PR checks (#2)
+- Add semantic PR checks (#2)
 
 - Add pull request template (#3)
 
