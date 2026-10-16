@@ -70,6 +70,12 @@ If the change was not verified, provide the reason as a bullet point.
 
 - [確認内容と結果 / Verification step and result]
 
+## PR diff statistics
+
+<!-- pr-diff-statistics:start -->
+_Statistics are added after the pull request is opened._
+<!-- pr-diff-statistics:end -->
+
 ---
 
 <!-- AUTO-GENERATED METADATA: DO NOT EDIT BELOW THIS LINE -->

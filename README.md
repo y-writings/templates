@@ -4,6 +4,34 @@ This repository manages baseline configuration for repositories maintained by [y
 
 It is designed to be used with [driftline](https://github.com/y-writings/driftline) to apply these baseline settings across those repositories.
 
+## PR diff statistics
+
+The `PR diff statistics` workflow groups the files changed by a pull request
+according to `.github/pr-diff-groups.json`. The top-level `output` setting
+selects where the report is maintained:
+
+- `"comment"` creates or updates the action's fixed pull request comment. This
+  is also the default when `output` is omitted.
+- `"pr-body"` updates a report region in the pull request body. The shared
+  configuration uses this mode.
+
+For `pr-body` mode, place exactly one ordered marker pair wherever the report
+should appear in the pull request template:
+
+```markdown
+<!-- pr-diff-statistics:start -->
+_Statistics are added after the pull request is opened._
+<!-- pr-diff-statistics:end -->
+```
+
+The action preserves the markers and everything outside them. If neither
+marker exists, it appends the marked region to the body; malformed, reversed,
+or duplicate markers cause the action to fail without modifying the body.
+
+The workflow token needs `contents: read` to load configuration from the pull
+request head and `pull-requests: write` to update either the pull request body
+or its fixed comment. No separate action input is needed to select the output.
+
 ## Approving a pull request from a comment
 
 The `[00] Approve pull request from comment` workflow lets an authorized user ask
