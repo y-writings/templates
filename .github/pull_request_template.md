@@ -7,7 +7,6 @@
 - Verificationは、日本語または英語のどちらか一方で箇条書きにする
 
 提出前に、プレースホルダーと案内用のHTMLコメントを削除してください。
-AUTO-GENERATED METADATAコメントは削除しないでください。
 
 Guidelines:
 - Write the title in either Japanese or English
@@ -18,7 +17,6 @@ Guidelines:
 - Write Verification as bullet points in either Japanese or English
 
 Before submitting, remove all placeholders and instructional HTML comments.
-Do not remove the AUTO-GENERATED METADATA comment.
 -->
 
 # [タイトル / Title]
@@ -73,9 +71,7 @@ If the change was not verified, provide the reason as a bullet point.
 ## PR diff statistics
 
 <!-- pr-diff-statistics:start -->
+
 _Statistics are added after the pull request is opened._
+
 <!-- pr-diff-statistics:end -->
-
----
-
-<!-- AUTO-GENERATED METADATA: DO NOT EDIT BELOW THIS LINE -->

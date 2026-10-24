@@ -1,23 +1,21 @@
 name: "[00] Entire checkpoint collection"
-
 on:
   pull_request_target:
     types: [opened, synchronize, edited, reopened]
-
 permissions:
   contents: read
   pull-requests: write
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
   update-pr-body:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Collect checkpoints and update PR body
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            const markerStart = "<!-- entire-checkpoints:start -->";
-            const markerEnd = "<!-- entire-checkpoints:end -->";
             const heading = "## Entire checkpoints";
 
             const { owner, repo } = context.repo;
@@ -47,21 +45,17 @@ jobs:
             )].sort((a, b) => a.localeCompare(b));
 
             const section = [
-              markerStart,
               heading,
               "",
               checkpoints.length > 0
                 ? checkpoints.join("\n")
                 : "_No Entire checkpoints found._",
-              markerEnd,
             ].join("\n");
 
-            const escapedStart = markerStart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-            const escapedEnd = markerEnd.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-            const markerRegex = new RegExp(`${escapedStart}[\\s\\S]*?${escapedEnd}`, "m");
+            const sectionRegex = /(^|\r?\n)## Entire checkpoints[ \t]*(?=\r?\n|$)[\s\S]*?(?=\r?\n#{1,2}[ \t]|$)/;
 
-            const updatedBody = markerRegex.test(currentBody)
-              ? currentBody.replace(markerRegex, section)
+            const updatedBody = sectionRegex.test(currentBody)
+              ? currentBody.replace(sectionRegex, (_, prefix) => `${prefix}${section}\n`).trim()
               : `${currentBody.trim()}\n\n${section}`.trim();
 
             if (updatedBody === currentBody) {
