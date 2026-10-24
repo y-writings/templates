@@ -61,7 +61,41 @@ jobs:
               if (headings.length > 1) return { error: "PR body has duplicate Entire checkpoint sections." };
               if (headings.length === 0) return { body: append(body, section, eol) };
               const headingIndex = headings[0];
-              const nextHeading = lines.findIndex((line, i) => i > headingIndex && isH1OrH2(line));
+              let nextHeading = -1;
+              let paragraphStart = -1;
+              let inListOrQuote = false;
+              for (let i = headingIndex + 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (isH1OrH2(line)) {
+                  nextHeading = i;
+                  break;
+                }
+                if (line.outside && paragraphStart !== -1 && /^ {0,3}(?:=+|-+)[ \t]*$/.test(line.text)) {
+                  nextHeading = paragraphStart;
+                  break;
+                }
+                if (
+                  !line.outside || /^[ \t]*$/.test(line.text) ||
+                  /^ {0,3}#{1,6}(?:[ \t]+|$)/.test(line.text) ||
+                  /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/.test(line.text)
+                ) {
+                  paragraphStart = -1;
+                  inListOrQuote = false;
+                  continue;
+                }
+                const list = line.text.match(/^ {0,3}([-+*]|\d{1,9}[.)])(?:[ \t]+(.*)|$)/);
+                if (
+                  /^ {0,3}>/.test(line.text) ||
+                  (list && (paragraphStart === -1 || (list[2] && /^(?:[-+*]|1[.)])$/.test(list[1]))))
+                ) {
+                  paragraphStart = -1;
+                  inListOrQuote = true;
+                  continue;
+                }
+                if (!inListOrQuote && paragraphStart === -1 && !/^(?: {4}| {0,3}\t)/.test(line.text)) {
+                  paragraphStart = i;
+                }
+              }
               if (nextHeading === -1) return { body: body.slice(0, lines[headingIndex].start) + section };
               return {
                 body: body.slice(0, lines[headingIndex].start) + section + eol + eol + body.slice(lines[nextHeading].start),
