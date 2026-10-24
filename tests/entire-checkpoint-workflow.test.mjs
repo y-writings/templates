@@ -180,3 +180,62 @@ test("updates a three-space heading beside indented code and preserves the next 
     assert.deepEqual(result.warnings, [], label);
   }
 });
+
+for (const [label, suffix, eol] of [
+  [
+    "a Setext H1 with a one-character underline",
+    "Verification\n=\nkeep\n",
+    "\n",
+  ],
+  [
+    "a multiline Setext H2 with an indented continuation",
+    "   Verification\r\n    continued\r\n   -  \r\nkeep\r\n",
+    "\r\n",
+  ],
+  [
+    "a Setext heading with a non-interrupting ordered marker",
+    "Verification\n2. continued\n---\nkeep\n",
+    "\n",
+  ],
+]) {
+  test(`preserves ${label} and its following content`, async () => {
+    const prefix = `before${eol}${eol}`;
+    const body = `${prefix}## Entire checkpoints${eol}replace me${eol}${eol}${suffix}`;
+    const result = await execute({ body, commits: ["Entire-Checkpoint: abc"] });
+    assert.equal(result.updates.length, 1);
+    assert.equal(
+      result.body,
+      `${prefix}${section.replaceAll("\n", eol)}${eol}${eol}${suffix}`,
+    );
+  });
+}
+
+test("keeps rules and code or container examples inside the checkpoint section", async () => {
+  const examples = [
+    ["blank-separated rule", "notes\n\n---"],
+    ["internally spaced rule", "notes\n- - -"],
+    ["indented underline", "notes\n    ---"],
+    ["indented text", "    Example\n---"],
+    ["fenced example", "```md\nExample\n---\n```"],
+    ["ATX H3 followed by a rule", "### child\n---"],
+    ["list followed by a rule", "- item\n---"],
+    ["quote followed by a rule", "> quote\n---"],
+    ["list with lazy continuation", "- item\ncontinued\n---"],
+    ["quote with lazy continuation", "> quote\ncontinued\n---"],
+  ];
+  for (const [label, example] of examples) {
+    const suffix = "## Next\nkeep\n";
+    const body = `before\n\n## Entire checkpoints\nreplace me\n\n${example}\n\n${suffix}`;
+    const result = await execute({ body, commits: ["Entire-Checkpoint: abc"] });
+    assert.equal(result.updates.length, 1, label);
+    assert.equal(result.body, `before\n\n${section}\n\n${suffix}`, label);
+  }
+});
+
+test("recognizes a Setext heading after a rule ends a quote's lazy continuation", async () => {
+  const suffix = "Verification\n-\nkeep\n";
+  const body = `## Entire checkpoints\n> quote\ncontinued\n---\n${suffix}`;
+  const result = await execute({ body, commits: ["Entire-Checkpoint: abc"] });
+  assert.equal(result.updates.length, 1);
+  assert.equal(result.body, `${section}\n\n${suffix}`);
+});
