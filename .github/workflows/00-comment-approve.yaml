@@ -2,13 +2,21 @@ name: "[00] Approve pull request from comment"
 on:
   issue_comment:
     types: [created]
+  # Default-branch workflow only. Do not switch this to pull_request: that
+  # event runs the workflow from the pull request, which could rewrite the
+  # allowlist and then approve itself with the app token.
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
 jobs:
   approve:
     name: Approve pull request
     if: >-
-      github.event.issue.pull_request && github.event.issue.state == 'open' && github.event.comment.user.login == 'y-writings' && github.event.comment.body == 'approve'
+      github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.issue.state == 'open' && github.event.comment.user.login == 'y-writings' && github.event.comment.body == 'approve'
     runs-on: ubuntu-latest
     steps:
       - name: Create approver GitHub App token
@@ -23,3 +31,44 @@ jobs:
         with:
           pull-request-number: ${{ github.event.issue.number }}
           github-token: ${{ steps.approver-token.outputs.token }}
+  approve-docs-and-config:
+    name: Approve documentation or config pull request
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      # Checkout is the default branch (pull_request_target's GITHUB_SHA), never
+      # the pull request head. The script classifies with a fixed allowlist.
+      # PR Diff Lens is intentionally not called: its suffix groups come from
+      # the pull request head and cannot exclude workflow, script, build, or
+      # lock files.
+      - name: Check out default branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Classify pull request files
+        id: classify
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/comment-approve-docs.mjs classify
+      - name: Create approver GitHub App token
+        id: approver-token
+        if: steps.classify.outputs.safe == 'true' || steps.classify.outputs.dismiss == 'true'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.PR_APPROVER_APP_ID }}
+          private-key: ${{ secrets.PR_APPROVER_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+      - name: Approve or dismiss pinned decision
+        if: steps.classify.outputs.safe == 'true' || steps.classify.outputs.dismiss == 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.approver-token.outputs.token }}
+          APPROVER_LOGIN: ${{ steps.approver-token.outputs.app-slug }}[bot]
+          EXPECTED_HEAD_SHA: ${{ steps.classify.outputs.head_sha }}
+          EXPECTED_BASE_SHA: ${{ steps.classify.outputs.base_sha }}
+          CLASSIFICATION_SAFE: ${{ steps.classify.outputs.safe }}
+        run: node .github/scripts/comment-approve-docs.mjs apply

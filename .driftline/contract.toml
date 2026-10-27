@@ -8,6 +8,7 @@ entries = [
 
 [files.github]
 comment-approve = { path = ".github/workflows/00-comment-approve.yaml", mode = "managed" }
+comment-approve-docs = { path = ".github/scripts/comment-approve-docs.mjs", mode = "managed" }
 entire-checkpoint-collection = {
   path = ".github/workflows/00-entire-checkpoint-collection.yaml",
   mode = "managed"
