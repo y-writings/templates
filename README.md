@@ -41,6 +41,14 @@ on issues, comments on closed or merged pull requests, edited comments, other te
 and comments from users outside the allowlist are ignored. The initial allowlist
 contains only `y-writings`.
 
+The same workflow also approves an open pull request that changes only
+documentation or non-executable configuration. That job runs on
+`pull_request_target` for `opened`, `synchronize`, `reopened`, and
+`ready_for_review`. It calls `pr-seal-action` with `path-preset: docs-and-config`,
+`require-expected-author` set to false, `auto-merge` set to false, and
+`on-ineligible` set to `skip`. A pull request that changes anything else is left
+unapproved and the job succeeds. The job does not check out the pull request.
+
 The workflow only submits an approving review. It does not enable auto-merge or
 merge the pull request, and it does not check out or execute pull request code.
 
@@ -48,8 +56,10 @@ Repository administrators must configure the existing approver GitHub App with:
 
 - A `PR_APPROVER_APP_ID` Actions variable containing the App ID.
 - A `PR_APPROVER_APP_PRIVATE_KEY` Actions secret containing the App private key.
-- **Pull requests: Read and write** permission on the App, with the App installed
-  on this repository.
+- **Pull requests: Read and write** and **Contents: Read** permissions on the
+  App, with the App installed on this repository. The comment job requests only
+  pull request write. The documentation job also requests contents read so it
+  can check git file modes.
 
 To change who may invoke the command, update the login check in
 `.github/workflows/00-comment-approve.yaml`. Keep the full-body equality check for

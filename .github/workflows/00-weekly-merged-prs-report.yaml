@@ -90,7 +90,7 @@ jobs:
           private-key: ${{ secrets.PR_APPROVER_APP_PRIVATE_KEY }}
       - name: Verify, approve, and enable auto-merge for changelog pull request
         if: ${{ steps.changelog-pull-request.outputs.pull-request-number != '' }}
-        uses: y-writings/pr-seal-action@b75d704586ce38c6f097eac85f41d687c077ff42 # v0.1.1
+        uses: y-writings/pr-seal-action@def2623a8f12edd497ce0108c348bc2f01e39be1 # v0.1.1
         with:
           repository: ${{ github.repository }}
           pull-request-number: ${{ steps.changelog-pull-request.outputs.pull-request-number }}
